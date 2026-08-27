@@ -1,6 +1,7 @@
 package com.teammesh.TeamMesh.user;
 
-import java.time.Instant;
+
+import com.teammesh.TeamMesh.common.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,7 +12,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="users")
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,12 +26,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name="created_at", nullable = false)
-    private Instant createdAt;
-
-    @Column(name="updated_at", nullable= false)
-    private Instant updatedAt;
-
     protected User(){
 
     }
@@ -39,13 +34,19 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        Instant now = Instant.now();
-        this.createdAt = now;
-        this.updatedAt = now;
+       
     }
 
     public Long getId(){
         return id;
+    }
+
+    public String getPassword(){
+        return password;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
     }
 
     public String getName(){
