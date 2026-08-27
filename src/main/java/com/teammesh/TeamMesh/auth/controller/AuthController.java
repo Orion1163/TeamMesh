@@ -8,7 +8,7 @@ import com.teammesh.TeamMesh.auth.dto.request.RegisterRequest;
 import com.teammesh.TeamMesh.auth.dto.response.LoginResponse;
 import com.teammesh.TeamMesh.auth.dto.response.UserResponse;
 import com.teammesh.TeamMesh.auth.service.AuthService;
-import com.teammesh.TeamMesh.user.User;
+import com.teammesh.TeamMesh.user.entity.User;
 
 import jakarta.validation.Valid;
 

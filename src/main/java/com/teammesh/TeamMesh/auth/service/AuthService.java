@@ -7,8 +7,8 @@ import com.teammesh.TeamMesh.auth.dto.request.LoginRequest;
 import com.teammesh.TeamMesh.auth.dto.request.RegisterRequest;
 import com.teammesh.TeamMesh.auth.dto.response.LoginResponse;
 import com.teammesh.TeamMesh.common.exception.EmailAlreadyExistsException;
-import com.teammesh.TeamMesh.user.User;
-import com.teammesh.TeamMesh.user.UserRepository;
+import com.teammesh.TeamMesh.user.entity.User;
+import com.teammesh.TeamMesh.user.repository.UserRepository;
 
 @Service
 public class AuthService {

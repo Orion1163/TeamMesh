@@ -1,5 +1,11 @@
-package com.teammesh.TeamMesh.user;
+package com.teammesh.TeamMesh.user.entity;
 
+
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.teammesh.TeamMesh.common.entity.BaseEntity;
 
@@ -12,7 +18,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="users")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +46,6 @@ public class User extends BaseEntity {
     public Long getId(){
         return id;
     }
-
     public String getPassword(){
         return password;
     }
@@ -65,4 +70,15 @@ public class User extends BaseEntity {
         this.email = email;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities(){
+        return List.of();
+    }
+
+    @Override
+    public String getUsername(){
+        return email;
+    }
+
 }
+
