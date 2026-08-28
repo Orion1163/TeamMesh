@@ -3,6 +3,8 @@ package com.teammesh.TeamMesh.auth.security;
 import com.teammesh.TeamMesh.auth.service.JwtService;
 import com.teammesh.TeamMesh.user.entity.User;
 import com.teammesh.TeamMesh.user.repository.UserRepository;
+
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -46,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (jwtService.isTokenValid(token)) {
+        try {
 
             Long userId = jwtService.extractUserId(token);
 
@@ -55,11 +58,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (user != null) {
 
+                UserPrincipal userPrincipal = new UserPrincipal(user);
+
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                user,
+                                userPrincipal,
                                 null,
-                                user.getAuthorities()
+                                List.of()
                         );
 
                 authentication.setDetails(
@@ -70,6 +75,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                         .setAuthentication(authentication);
             }
+        }catch(JwtException exception){
+            
         }
 
         filterChain.doFilter(request, response);

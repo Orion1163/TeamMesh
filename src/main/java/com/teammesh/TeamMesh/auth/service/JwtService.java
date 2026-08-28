@@ -36,14 +36,14 @@ public class JwtService {
         return Long.parseLong(claims.getSubject());
     }
 
-    public boolean isTokenValid(String token){
-        try{
-            extractAllClaims(token);
-            return true;
-        }catch(Exception exception){
-            return false;
-        }
-    }
+    // public boolean isTokenValid(String token){
+    //     try{
+    //         extractAllClaims(token);
+    //         return true;
+    //     }catch(Exception exception){
+    //         return false;
+    //     }
+    // }
 
     public Claims extractAllClaims(String token){
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
