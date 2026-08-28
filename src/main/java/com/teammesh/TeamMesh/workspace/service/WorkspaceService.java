@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
 import com.teammesh.TeamMesh.user.entity.User;
 import com.teammesh.TeamMesh.user.repository.UserRepository;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
@@ -37,6 +38,13 @@ public class WorkspaceService {
 
         return workspaces.stream()
                 .map(workspace -> new WorkspaceResponse(workspace.getId(), workspace.getName(), workspace.getDescription(), workspace.getOwner().getId())).toList();
+    }
+
+    public WorkspaceResponse getWorkspaceById(Long workspaceId, Long userId){
+
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
+
+        return new WorkspaceResponse(workspace.getId(), workspace.getName(), workspace.getDescription(), workspace.getOwner().getId());
     }
 
 }

@@ -11,6 +11,7 @@ import com.teammesh.TeamMesh.workspace.service.WorkspaceService;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -45,5 +46,15 @@ public class WorkspaceController {
         return ResponseEntity.ok(workspaces);
     }
     
+    @GetMapping("/{workspaceId}")
+    public ResponseEntity<WorkspaceResponse> getWorkspaceById(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal principal){
+
+            System.out.println("CONTROLLER REACHED");
+
+            
+        WorkspaceResponse response = workspaceService.getWorkspaceById(workspaceId, principal.getId());
+
+        return ResponseEntity.ok(response);
+    }
     
 }

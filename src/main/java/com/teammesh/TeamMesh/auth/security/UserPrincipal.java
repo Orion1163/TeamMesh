@@ -1,10 +1,5 @@
 package com.teammesh.TeamMesh.auth.security;
-
-import java.util.Collection;
-import java.util.List;
-
-import org.springframework.security.core.GrantedAuthority;
-
+                       
 import com.teammesh.TeamMesh.user.entity.User;
 
 public class UserPrincipal   {
