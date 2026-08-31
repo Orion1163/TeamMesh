@@ -3,11 +3,13 @@ package com.teammesh.TeamMesh.workspace.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
 import com.teammesh.TeamMesh.user.entity.User;
 import com.teammesh.TeamMesh.user.repository.UserRepository;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
 import com.teammesh.TeamMesh.workspace.entity.Workspace;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceRepository;
@@ -42,9 +44,20 @@ public class WorkspaceService {
 
     public WorkspaceResponse getWorkspaceById(Long workspaceId, Long userId){
 
-        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
 
         return new WorkspaceResponse(workspace.getId(), workspace.getName(), workspace.getDescription(), workspace.getOwner().getId());
+    }
+
+    @Transactional
+    public WorkspaceResponse updatWorkspace(Long workspaceId, Long userId, UpdateWorkspaceRequest request){
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
+
+        workspace.setName(request.getName());
+        workspace.setDescription(request.getDescription());
+
+        return new WorkspaceResponse(workspace.getId(), workspace.getName(),workspace.getDescription(), workspace.getOwner().getId());
+        
     }
 
 }

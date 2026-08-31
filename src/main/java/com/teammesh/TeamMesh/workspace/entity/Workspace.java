@@ -45,4 +45,12 @@ public class Workspace extends BaseEntity {
     public User getOwner(){
         return owner;
     }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public void setDescription(String description){
+        this.description = description;
+    }
 }
