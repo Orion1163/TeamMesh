@@ -60,4 +60,11 @@ public class WorkspaceService {
         
     }
 
+    @Transactional
+    public void deleteWorkspace(Long workspaceId, Long userId){
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
+
+        workspaceRepository.delete(workspace);
+    }
+
 }
