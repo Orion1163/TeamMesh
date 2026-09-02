@@ -50,7 +50,8 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public WorkspaceResponse updatWorkspace(Long workspaceId, Long userId, UpdateWorkspaceRequest request){
+    public WorkspaceResponse updateWorkspace(Long workspaceId, Long userId, UpdateWorkspaceRequest request){
+        
         Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
 
         workspace.setName(request.getName());

@@ -55,7 +55,7 @@ public class WorkspaceController {
     @PutMapping("/{workspaceId}")
     public ResponseEntity<WorkspaceResponse> updateWorkspace(@PathVariable Long workspaceId,@Valid @RequestBody UpdateWorkspaceRequest request ,
         @AuthenticationPrincipal UserPrincipal principal){
-        WorkspaceResponse response = workspaceService.updatWorkspace(workspaceId, principal.getId(), request);
+        WorkspaceResponse response = workspaceService.updateWorkspace(workspaceId, principal.getId(), request);
 
         return ResponseEntity.ok(response);
     }
