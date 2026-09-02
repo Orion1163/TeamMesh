@@ -3,6 +3,7 @@ package com.teammesh.TeamMesh.workspace.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.teammesh.TeamMesh.auth.security.UserPrincipal;
+import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
@@ -67,4 +68,12 @@ public class WorkspaceController {
             return ResponseEntity.noContent().build();
     }
     
+
+    @PostMapping("/{workspaceId}/members")
+    public ResponseEntity<Void> addMember(@PathVariable Long workspaceId, @Valid @RequestBody AddWorkspaceMemberRequest request , @AuthenticationPrincipal UserPrincipal principal){
+
+        workspaceService.addMember(workspaceId, principal.getId(), request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

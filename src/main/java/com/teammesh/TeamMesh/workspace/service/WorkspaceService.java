@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.teammesh.TeamMesh.common.exception.MemberAlreadyExistsException;
 import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
 import com.teammesh.TeamMesh.user.entity.User;
 import com.teammesh.TeamMesh.user.repository.UserRepository;
+import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
@@ -76,6 +78,28 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
 
         workspaceRepository.delete(workspace);
+    }
+
+    @Transactional
+    public void addMember(Long workspaceId, Long currentUserId, AddWorkspaceMemberRequest request){
+
+        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, currentUserId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
+
+        User userToAdd = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User not Found"));
+
+        if (request.getRole() == WorkspaceRole.OWNER){
+            throw new IllegalArgumentException("Owner role cannot be assigned to another member");
+        }
+
+        boolean alreadyExists = workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, currentUserId);
+
+        if(alreadyExists){
+            throw new MemberAlreadyExistsException("User is already a member of this workspace");
+        }
+
+        WorkspaceMember workspaceMember = new WorkspaceMember(workspace, userToAdd, request.getRole());
+
+        workspaceMemberRepository.save(workspaceMember);
     }
 
 }
