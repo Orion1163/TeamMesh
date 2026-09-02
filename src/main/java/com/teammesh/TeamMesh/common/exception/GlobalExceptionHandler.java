@@ -46,4 +46,11 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+
+    @ExceptionHandler(MemberAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleMemberAlreadyExists(MemberAlreadyExistsException exception){
+        ApiErrorResponse response = new ApiErrorResponse(false, HttpStatus.CONFLICT.value(), exception.getMessage(), Instant.now(), null);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 }

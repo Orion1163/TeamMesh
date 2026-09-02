@@ -12,6 +12,9 @@ import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
 import com.teammesh.TeamMesh.workspace.entity.Workspace;
+import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
+import com.teammesh.TeamMesh.workspace.entity.WorkspaceRole;
+import com.teammesh.TeamMesh.workspace.repository.WorkspaceMemberRepository;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceRepository;
 
 @Service
@@ -19,18 +22,25 @@ public class WorkspaceService {
     
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
-    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository){
+    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository){
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
+        this.workspaceMemberRepository = workspaceMemberRepository;
     }
 
     public WorkspaceResponse createWorkspace(CreateWorkspaceRequest request, Long userId){
-        User owner = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        User owner = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 
         Workspace workspace = new Workspace(request.getName(), request.getDescription(), owner);
  
         Workspace savedWorkspace = workspaceRepository.save(workspace);
+
+        WorkspaceMember ownerMembership = new WorkspaceMember(savedWorkspace, owner, WorkspaceRole.OWNER);
+
+        workspaceMemberRepository.save(ownerMembership);
 
         return new WorkspaceResponse(savedWorkspace.getId(), savedWorkspace.getName(), savedWorkspace.getDescription(), savedWorkspace.getOwner().getId());
     }
@@ -51,7 +61,7 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse updateWorkspace(Long workspaceId, Long userId, UpdateWorkspaceRequest request){
-        
+
         Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
 
         workspace.setName(request.getName());

@@ -6,5 +6,5 @@ import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
 
 public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember, Long> {
 
-
+    boolean existsByWorkspaceIdAndUserId(Long workspaceId, Long userId);
 } 
