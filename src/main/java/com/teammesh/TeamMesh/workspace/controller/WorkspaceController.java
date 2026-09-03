@@ -6,6 +6,7 @@ import com.teammesh.TeamMesh.auth.security.UserPrincipal;
 import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
 import com.teammesh.TeamMesh.workspace.service.WorkspaceService;
 import jakarta.validation.Valid;
@@ -75,5 +76,13 @@ public class WorkspaceController {
         workspaceService.addMember(workspaceId, principal.getId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/{workspaceId}/members")
+    public ResponseEntity<List<WorkspaceMemberResponse>> getWorkspaceMembers(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal principal){
+
+        List<WorkspaceMemberResponse> response = workspaceService.getWorkspaceMembers(workspaceId, principal.getId());
+
+        return ResponseEntity.ok(response);
     }
 }

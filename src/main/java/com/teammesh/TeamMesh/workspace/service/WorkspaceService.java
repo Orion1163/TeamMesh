@@ -7,11 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.teammesh.TeamMesh.common.exception.MemberAlreadyExistsException;
 import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
+import com.teammesh.TeamMesh.common.exception.IllegalArgumentException;
 import com.teammesh.TeamMesh.user.entity.User;
 import com.teammesh.TeamMesh.user.repository.UserRepository;
 import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
 import com.teammesh.TeamMesh.workspace.entity.Workspace;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
@@ -100,6 +102,20 @@ public class WorkspaceService {
         WorkspaceMember workspaceMember = new WorkspaceMember(workspace, userToAdd, request.getRole());
 
         workspaceMemberRepository.save(workspaceMember);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkspaceMemberResponse> getWorkspaceMembers(Long workspaceId, Long currentUserId){
+
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
+
+        boolean isMember = workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, currentUserId);
+
+        if(!isMember){
+            throw new IllegalArgumentException("You are not Member of this Workspace");
+        }
+
+        return workspaceMemberRepository.findByWorkspaceId(workspace.getId()).stream().map(member -> new WorkspaceMemberResponse(member.getUser().getId(), member.getUser().getName(), member.getUser().getEmail(), member.getRole())).toList();
     }
 
 }
