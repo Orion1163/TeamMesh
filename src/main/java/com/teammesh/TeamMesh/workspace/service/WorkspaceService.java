@@ -27,11 +27,13 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final WorkspaceAuthorizationService workspaceAuthorizationService;
 
-    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository){
+    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository, WorkspaceAuthorizationService workspaceAuthorizationService){
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
         this.workspaceMemberRepository = workspaceMemberRepository;
+        this.workspaceAuthorizationService = workspaceAuthorizationService;
     }
 
     public WorkspaceResponse createWorkspace(CreateWorkspaceRequest request, Long userId){
@@ -66,7 +68,9 @@ public class WorkspaceService {
     @Transactional
     public WorkspaceResponse updateWorkspace(Long workspaceId, Long userId, UpdateWorkspaceRequest request){
 
-        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
+        workspaceAuthorizationService.requireOwner(workspaceId, userId);
+
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ResourceNotFoundException("Workspace not Found"));
 
         workspace.setName(request.getName());
         workspace.setDescription(request.getDescription());
@@ -85,7 +89,9 @@ public class WorkspaceService {
     @Transactional
     public void addMember(Long workspaceId, Long currentUserId, AddWorkspaceMemberRequest request){
 
-        Workspace workspace = workspaceRepository.findByIdAndOwnerId(workspaceId, currentUserId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
+        workspaceAuthorizationService.requireOwner(workspaceId, currentUserId);
+
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
 
         User userToAdd = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new ResourceNotFoundException("User not Found"));
 
@@ -109,13 +115,9 @@ public class WorkspaceService {
 
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
 
-        boolean isMember = workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, currentUserId);
-
-        if(!isMember){
-            throw new IllegalArgumentException("You are not Member of this Workspace");
-        }
-
-        return workspaceMemberRepository.findByWorkspaceId(workspace.getId()).stream().map(member -> new WorkspaceMemberResponse(member.getUser().getId(), member.getUser().getName(), member.getUser().getEmail(), member.getRole())).toList();
+        workspaceAuthorizationService.getMembership(workspaceId, currentUserId);
+        
+        return workspaceMemberRepository.findMembersWithUserByWorkspaceId(workspace.getId()).stream().map(member -> new WorkspaceMemberResponse(member.getUser().getId(), member.getUser().getName(), member.getUser().getEmail(), member.getRole())).toList();
     }
 
 }
