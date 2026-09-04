@@ -99,7 +99,7 @@ public class WorkspaceService {
             throw new IllegalArgumentException("Owner role cannot be assigned to another member");
         }
 
-        boolean alreadyExists = workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, currentUserId);
+        boolean alreadyExists = workspaceMemberRepository.existsByWorkspaceIdAndUserId(workspaceId, userToAdd.getId());
 
         if(alreadyExists){
             throw new MemberAlreadyExistsException("User is already a member of this workspace");
@@ -116,8 +116,21 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ResourceNotFoundException("Workspace Not Found"));
 
         workspaceAuthorizationService.getMembership(workspaceId, currentUserId);
-        
+
         return workspaceMemberRepository.findMembersWithUserByWorkspaceId(workspace.getId()).stream().map(member -> new WorkspaceMemberResponse(member.getUser().getId(), member.getUser().getName(), member.getUser().getEmail(), member.getRole())).toList();
+    }
+
+    @Transactional
+    public void removeMembership(Long workspaceId, Long currentUserId, Long userIdToRemove){
+        workspaceAuthorizationService.requireOwner(workspaceId, currentUserId);
+
+        if(currentUserId.equals(userIdToRemove)){
+            throw new IllegalArgumentException("Workspace Owner cannot remove themselves");
+        }
+
+        WorkspaceMember member = workspaceAuthorizationService.getMembership(workspaceId, userIdToRemove);
+
+        workspaceMemberRepository.delete(member);
     }
 
 }

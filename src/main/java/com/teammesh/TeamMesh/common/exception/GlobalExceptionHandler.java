@@ -33,20 +33,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException exception){
         ApiErrorResponse response = new ApiErrorResponse(false, HttpStatus.BAD_REQUEST.value(), exception.getMessage(), Instant.now(), null);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception exception){
-        ApiErrorResponse response = new ApiErrorResponse(false,HttpStatus.INTERNAL_SERVER_ERROR.value(), "An Unexpected Error Occurred", Instant.now(), null);
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -61,6 +52,20 @@ public class GlobalExceptionHandler {
         ApiErrorResponse response = new ApiErrorResponse(false, HttpStatus.CONFLICT.value(), exception.getMessage(), Instant.now(), null);
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException exception){
+        ApiErrorResponse response = new ApiErrorResponse(false, HttpStatus.FORBIDDEN.value(), exception.getMessage(), Instant.now(), null);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception exception){
+        ApiErrorResponse response = new ApiErrorResponse(false,HttpStatus.INTERNAL_SERVER_ERROR.value(), "An Unexpected Error Occurred", Instant.now(), null);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
 }

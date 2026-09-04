@@ -1,12 +1,13 @@
 package com.teammesh.TeamMesh.workspace.service;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceRole;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceMemberRepository;
+import com.teammesh.TeamMesh.common.exception.AccessDeniedException;
 
 @Service
 public class WorkspaceAuthorizationService {
@@ -20,7 +21,7 @@ public class WorkspaceAuthorizationService {
     @Transactional(readOnly = true)
     public WorkspaceMember getMembership(Long workspaceId, Long userId){
 
-        return workspaceMemberRepository.findByWorkspaceIdAndUserId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("You are not a member of this workspace"));
+        return workspaceMemberRepository.findByWorkspaceIdAndUserId(workspaceId, userId).orElseThrow(() -> new AccessDeniedException("You are not a member of this workspace"));
     }
 
     @Transactional(readOnly = true)
@@ -33,7 +34,7 @@ public class WorkspaceAuthorizationService {
         WorkspaceRole role = getUserRole(workspaceId, userId);
 
         if(role != WorkspaceRole.OWNER){
-            throw new IllegalArgumentException("Only the workspace owner can perform this action");
+            throw new AccessDeniedException("Only the workspace owner can perform this action");
         }
     }
 }
