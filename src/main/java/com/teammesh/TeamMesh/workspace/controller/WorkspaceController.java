@@ -4,8 +4,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.teammesh.TeamMesh.auth.security.UserPrincipal;
 import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
+import com.teammesh.TeamMesh.workspace.dto.request.CreateProjectRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceMemberRoleRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.response.ProjectResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
 import com.teammesh.TeamMesh.workspace.service.WorkspaceService;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
@@ -91,5 +95,20 @@ public class WorkspaceController {
         workspaceService.removeMembership(workspaceId, principal.getId(), userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{workspaceId}/members/{userId}/role")
+    public ResponseEntity<Void> updateWorkspaceMemberRole(@PathVariable Long workspaceId, @PathVariable Long userId, @Valid  @RequestBody UpdateWorkspaceMemberRoleRequest request, @AuthenticationPrincipal UserPrincipal principal){
+        workspaceService.updateMemberRole(workspaceId,  principal.getId() ,userId, request);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{workspaceId}/projects")
+    public ResponseEntity<ProjectResponse> createProject(@PathVariable Long workspaceId, @Valid @RequestBody CreateProjectRequest request, @AuthenticationPrincipal UserPrincipal principal){
+
+        ProjectResponse response = workspaceService.createProject(workspaceId, principal.getId(), request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

@@ -4,6 +4,7 @@ package com.teammesh.TeamMesh.workspace.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.teammesh.TeamMesh.workspace.entity.Workspace;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceRole;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceMemberRepository;
@@ -36,5 +37,15 @@ public class WorkspaceAuthorizationService {
         if(role != WorkspaceRole.OWNER){
             throw new AccessDeniedException("Only the workspace owner can perform this action");
         }
+    }
+
+    @Transactional
+    public void requireOwnerOrAdmin(Long workspaceId, Long userId){
+        WorkspaceRole role = getUserRole(workspaceId, userId);
+
+        if(role != WorkspaceRole.ADMIN && role != WorkspaceRole.OWNER){
+            throw new AccessDeniedException("Only workspace Owners and admin can perform this action.");
+        }
+
     }
 }

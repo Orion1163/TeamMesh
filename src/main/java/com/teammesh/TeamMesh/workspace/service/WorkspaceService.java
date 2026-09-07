@@ -8,18 +8,24 @@ import org.springframework.transaction.annotation.Transactional;
 import com.teammesh.TeamMesh.common.exception.MemberAlreadyExistsException;
 import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
 import com.teammesh.TeamMesh.common.exception.IllegalArgumentException;
+import com.teammesh.TeamMesh.common.exception.InvalidOperationException;
 import com.teammesh.TeamMesh.user.entity.User;
 import com.teammesh.TeamMesh.user.repository.UserRepository;
 import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
+import com.teammesh.TeamMesh.workspace.dto.request.CreateProjectRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.response.ProjectResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
+import com.teammesh.TeamMesh.workspace.entity.Project;
 import com.teammesh.TeamMesh.workspace.entity.Workspace;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceRole;
+import com.teammesh.TeamMesh.workspace.repository.ProjectRepository;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceMemberRepository;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceRepository;
+import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceMemberRoleRequest;
 
 @Service
 public class WorkspaceService {
@@ -28,12 +34,14 @@ public class WorkspaceService {
     private final UserRepository userRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceAuthorizationService workspaceAuthorizationService;
+    private final ProjectRepository projectRepository;
 
-    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository, WorkspaceAuthorizationService workspaceAuthorizationService){
+    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository, WorkspaceAuthorizationService workspaceAuthorizationService, ProjectRepository projectRepository){
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
         this.workspaceMemberRepository = workspaceMemberRepository;
         this.workspaceAuthorizationService = workspaceAuthorizationService;
+        this.projectRepository = projectRepository;
     }
 
     public WorkspaceResponse createWorkspace(CreateWorkspaceRequest request, Long userId){
@@ -131,6 +139,46 @@ public class WorkspaceService {
         WorkspaceMember member = workspaceAuthorizationService.getMembership(workspaceId, userIdToRemove);
 
         workspaceMemberRepository.delete(member);
+    }
+
+    @Transactional
+    public void updateMemberRole(Long workspaceId, Long currentUserId, Long userId, UpdateWorkspaceMemberRoleRequest request){
+
+        workspaceAuthorizationService.requireOwner(workspaceId, currentUserId);
+
+        WorkspaceMember member = workspaceAuthorizationService.getMembership(workspaceId, userId);
+
+        if(member.getRole() == WorkspaceRole.OWNER){
+            throw new IllegalArgumentException("Workspace owner's role cannot be changed");
+        }
+        
+        if(request.getRole() == WorkspaceRole.OWNER){
+            throw new IllegalArgumentException("OWNER role cannot be assigned through this operation");
+        }
+
+        member.setRole(request.getRole());
+    }
+
+    @Transactional
+    public ProjectResponse createProject(Long workspaceId, Long userId, CreateProjectRequest request){
+        workspaceAuthorizationService.requireOwnerOrAdmin(workspaceId, userId);
+
+        //find workspace
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+
+        //prevent duplicate project name
+        boolean exists = projectRepository.existsByWorkspaceIdAndName(workspaceId, request.getName());
+
+        if(exists){
+            throw new InvalidOperationException("A project with this name already exists.");
+        }
+
+        //Create project
+        Project project = new Project(request.getName(), request.getDescription(), workspace);
+        
+        Project savedProject = projectRepository.save(project);
+
+        return new ProjectResponse(savedProject.getId(), savedProject.getName(), savedProject.getDescription(), workspace.getId());
     }
 
 }

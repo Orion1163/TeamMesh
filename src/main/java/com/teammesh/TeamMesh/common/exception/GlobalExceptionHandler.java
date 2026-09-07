@@ -61,6 +61,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOperation(InvalidOperationException exception){
+        ApiErrorResponse response = new ApiErrorResponse(false, HttpStatus.BAD_REQUEST.value(), exception.getMessage(), Instant.now(), null);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception exception){
         ApiErrorResponse response = new ApiErrorResponse(false,HttpStatus.INTERNAL_SERVER_ERROR.value(), "An Unexpected Error Occurred", Instant.now(), null);
