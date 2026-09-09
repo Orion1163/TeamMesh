@@ -11,7 +11,7 @@ public class ProjectResponse {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.id = id;
+        this.workspaceId = workspaceId;
     }
 
     public Long getId(){

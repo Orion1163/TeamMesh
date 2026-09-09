@@ -6,6 +6,7 @@ import com.teammesh.TeamMesh.auth.security.UserPrincipal;
 import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateProjectRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.request.UpdateProjectRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceMemberRoleRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.ProjectResponse;
@@ -110,5 +111,36 @@ public class WorkspaceController {
         ProjectResponse response = workspaceService.createProject(workspaceId, principal.getId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{workspaceId}/projects")
+    public ResponseEntity<List<ProjectResponse>> getProjects(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal principal){
+        List<ProjectResponse> response = workspaceService.getProjects(workspaceId, principal.getId());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{workspaceId}/project/{projectId}")
+    public ResponseEntity<ProjectResponse> getProject(@PathVariable Long workspaceId, @PathVariable Long projectId, @AuthenticationPrincipal UserPrincipal principal){
+        ProjectResponse response = workspaceService.getProject(workspaceId, projectId, principal.getId());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{workspaceId}/projects/{projectId}")
+    public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long workspaceId, @PathVariable Long projectId, 
+    @Valid @RequestBody UpdateProjectRequest request,@AuthenticationPrincipal UserPrincipal principal){
+
+        ProjectResponse response = workspaceService.updateProject(workspaceId, principal.getId(), projectId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{workspaceId}/projects/{projectId}")
+    public ResponseEntity<Void> deleteProject(@PathVariable Long workspaceId, @PathVariable Long projectId, @AuthenticationPrincipal UserPrincipal principal){
+
+        workspaceService.deleteProject(workspaceId, principal.getId(), projectId);
+
+        return ResponseEntity.noContent().build();
     }
 }

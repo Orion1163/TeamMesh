@@ -1,6 +1,7 @@
 package com.teammesh.TeamMesh.workspace.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByWorkspaceId(Long workspaceId);
 
     boolean existsByWorkspaceIdAndName(Long workspaceId, String name);
+
+    Optional<Project> findByIdAndWorkspaceId(Long projectId, Long WorkspaceId);
     
 } 

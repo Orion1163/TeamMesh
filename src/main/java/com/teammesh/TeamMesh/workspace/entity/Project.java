@@ -1,9 +1,6 @@
 package com.teammesh.TeamMesh.workspace.entity;
 
-import org.hibernate.boot.registry.classloading.spi.ClassLoaderService.Work;
-
 import com.teammesh.TeamMesh.common.entity.BaseEntity;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

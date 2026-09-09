@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teammesh.TeamMesh.common.exception.MemberAlreadyExistsException;
+import com.teammesh.TeamMesh.common.exception.ProjectAlreadyExistsException;
 import com.teammesh.TeamMesh.common.exception.ResourceNotFoundException;
 import com.teammesh.TeamMesh.common.exception.IllegalArgumentException;
 import com.teammesh.TeamMesh.common.exception.InvalidOperationException;
@@ -14,6 +15,7 @@ import com.teammesh.TeamMesh.user.repository.UserRepository;
 import com.teammesh.TeamMesh.workspace.dto.request.AddWorkspaceMemberRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateProjectRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.CreateWorkspaceRequest;
+import com.teammesh.TeamMesh.workspace.dto.request.UpdateProjectRequest;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.ProjectResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
@@ -170,7 +172,7 @@ public class WorkspaceService {
         boolean exists = projectRepository.existsByWorkspaceIdAndName(workspaceId, request.getName());
 
         if(exists){
-            throw new InvalidOperationException("A project with this name already exists.");
+            throw new ProjectAlreadyExistsException("A project with this name already exists.");
         }
 
         //Create project
@@ -179,6 +181,52 @@ public class WorkspaceService {
         Project savedProject = projectRepository.save(project);
 
         return new ProjectResponse(savedProject.getId(), savedProject.getName(), savedProject.getDescription(), workspace.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> getProjects(Long workspaceId, Long userId){
+        workspaceAuthorizationService.getMembership(workspaceId, userId);
+        
+        List<Project> projects = projectRepository.findByWorkspaceId(workspaceId);
+
+        return projects.stream().map(project -> new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getWorkspace().getId())).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProjectResponse getProject(Long workspaceId, Long projectId, Long userId){
+        workspaceAuthorizationService.getMembership(workspaceId, userId);
+
+        Project project = projectRepository.findByIdAndWorkspaceId(projectId, workspaceId).orElseThrow(() -> new ResourceNotFoundException("Project Not Found"));
+
+        return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project.getWorkspace().getId());
+    }
+
+    @Transactional
+    public ProjectResponse updateProject(Long workspaceId, Long userId, Long projectId, UpdateProjectRequest request){
+        workspaceAuthorizationService.requireOwnerOrAdmin(workspaceId, userId);
+
+        Project project = projectRepository.findByIdAndWorkspaceId(projectId, workspaceId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        boolean nameChanged = !project.getName().equals(request.getName());
+
+        if(nameChanged && projectRepository.existsByWorkspaceIdAndName(workspaceId, request.getName())){
+            throw new ProjectAlreadyExistsException("A project with this name already exists");
+        }
+
+        project.setName(request.getName());
+        project.setDescription(request.getDescription());
+
+        return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), workspaceId);
+    }
+
+    @Transactional
+    public void deleteProject(Long workspaceId, Long userId, Long projectId){
+        workspaceAuthorizationService.requireOwnerOrAdmin(workspaceId, userId);
+
+        Project project = projectRepository.findByIdAndWorkspaceId(projectId, workspaceId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        projectRepository.delete(project);
+        
     }
 
 }

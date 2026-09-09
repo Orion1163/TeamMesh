@@ -68,6 +68,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(ProjectAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleProjectAlreadyExists(ProjectAlreadyExistsException exception){
+        ApiErrorResponse response = new ApiErrorResponse(false, HttpStatus.CONFLICT.value(), exception.getMessage(), Instant.now(), null);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception exception){
         ApiErrorResponse response = new ApiErrorResponse(false,HttpStatus.INTERNAL_SERVER_ERROR.value(), "An Unexpected Error Occurred", Instant.now(), null);
