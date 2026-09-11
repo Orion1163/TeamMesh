@@ -20,11 +20,16 @@ import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.ProjectResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
+import com.teammesh.TeamMesh.workspace.dto.task.request.CreateTaskRequest;
+import com.teammesh.TeamMesh.workspace.dto.task.response.TaskResponse;
 import com.teammesh.TeamMesh.workspace.entity.Project;
 import com.teammesh.TeamMesh.workspace.entity.Workspace;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceMember;
 import com.teammesh.TeamMesh.workspace.entity.WorkspaceRole;
+import com.teammesh.TeamMesh.workspace.model.task.Task;
+import com.teammesh.TeamMesh.workspace.model.task.TaskStatus;
 import com.teammesh.TeamMesh.workspace.repository.ProjectRepository;
+import com.teammesh.TeamMesh.workspace.repository.TaskRepository;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceMemberRepository;
 import com.teammesh.TeamMesh.workspace.repository.WorkspaceRepository;
 import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceMemberRoleRequest;
@@ -37,13 +42,15 @@ public class WorkspaceService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceAuthorizationService workspaceAuthorizationService;
     private final ProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
 
-    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository, WorkspaceAuthorizationService workspaceAuthorizationService, ProjectRepository projectRepository){
+    public WorkspaceService(WorkspaceRepository workspaceRepository, UserRepository userRepository, WorkspaceMemberRepository workspaceMemberRepository, WorkspaceAuthorizationService workspaceAuthorizationService, ProjectRepository projectRepository, TaskRepository taskRepository){
         this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
         this.workspaceMemberRepository = workspaceMemberRepository;
         this.workspaceAuthorizationService = workspaceAuthorizationService;
         this.projectRepository = projectRepository;
+        this.taskRepository = taskRepository;
     }
 
     public WorkspaceResponse createWorkspace(CreateWorkspaceRequest request, Long userId){
@@ -229,4 +236,5 @@ public class WorkspaceService {
         
     }
 
+   
 }

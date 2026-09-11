@@ -12,6 +12,9 @@ import com.teammesh.TeamMesh.workspace.dto.request.UpdateWorkspaceRequest;
 import com.teammesh.TeamMesh.workspace.dto.response.ProjectResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceMemberResponse;
 import com.teammesh.TeamMesh.workspace.dto.response.WorkspaceResponse;
+import com.teammesh.TeamMesh.workspace.dto.task.request.CreateTaskRequest;
+import com.teammesh.TeamMesh.workspace.dto.task.response.TaskResponse;
+import com.teammesh.TeamMesh.workspace.service.TaskService;
 import com.teammesh.TeamMesh.workspace.service.WorkspaceService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -32,9 +35,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/v1/workspaces")
 public class WorkspaceController {
     private final WorkspaceService workspaceService;
-
-    public WorkspaceController(WorkspaceService workspaceService){
+    private final TaskService taskService;
+    public WorkspaceController(WorkspaceService workspaceService, TaskService taskService){
         this.workspaceService = workspaceService;
+        this.taskService = taskService;
     }
 
     @PostMapping
@@ -142,5 +146,12 @@ public class WorkspaceController {
         workspaceService.deleteProject(workspaceId, principal.getId(), projectId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{workspaceId}/projects/{projectId}/tasks")
+    public ResponseEntity<TaskResponse> createTask(@PathVariable Long workspaceId, @PathVariable Long projectId, @AuthenticationPrincipal UserPrincipal principal, @Valid @RequestBody CreateTaskRequest request){
+        TaskResponse response = taskService.createTask(workspaceId, projectId, principal.getId(), request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
